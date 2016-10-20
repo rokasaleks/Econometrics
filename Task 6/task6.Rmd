@@ -1,0 +1,128 @@
+---
+title: "Task6"
+author: "Rokas Aleksandravicius"
+date: "October 8, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Nuskaitome duomenis
+```{r}
+x=read.csv('R_programing_swirlResults.csv', stringsAsFactors=FALSE)
+View(x)
+sapply(x, class)
+x$sysTime <- as.POSIXlt(x$sysTime)
+x$datetime <- as.POSIXlt(x$datetime)
+```
+
+Isvalykite masyva nuo "siuksliu". Praktikoje retai, kada gaunamas pilnai sutvarkyti duomenys. Taip ir si karta, jums reikia isvalyti masyva nuo galimu problemu. Pavyzdziui ruosiant pateikties forma buvo testuojama ar viskas gerai veikia (reikia identifikuoti ir pasalinti siuo irasus)
+
+```{r}
+unique(x$user)
+a = x$user %in% c("1vbutkus","aaa", "testas")
+x = x[(a == FALSE),]
+```
+
+Toliau pastebime, jog kai kurie vartotojai pasirasinejo keliais skirtingais vardais, pvz., vardai "Juste", "juste", "ju", ir "j" priklauso tam paciam zmogui. Tas pats galioja ir vardams "gyse" ir "gyse3054" bei "rokasalek" ir "rokasaleks". Taigi, suvienodiname siuos vardus.
+
+```{r}
+x$user[x$user=="gyse"] <- "gyse3054"
+x$user[x$user=="rokasalek"] <- "rokasaleks"
+x$user[x$user=="Juste" | x$user=="ju" | x$user=="j"] <- "juste"
+unique(x$user)
+```
+
+Dabar, kai besidubliuojanciu vartotoju nebera, patikriname, ar nera pakartotinai to paties vartotojo suvestu pamoku ir pasaliname besidubliuojancias eilutes. Tam reikia tikrinti tik stulpelius su vartotojo vardu, pamokos pavadinimu, klausimo numeriu, bandymo numeriu ir "skipped" reiksme.
+
+```{r}
+x1 <- x[,c(7, 9, 10, 12, 14)]
+xkart <- which(duplicated(x1), TRUE)
+x <-x[-xkart,]
+```
+
+Kurie studentai yra pilnai atlike visas swirl uzduotis, t.y. pilnai atliktos visos uzduotis nepraleidziant jokiu klausimu. Tikrinam, kurie studentai praleido nors viena klausima ir pasalinam juos is saraso.
+```{r}
+table(x[x$skipped==TRUE,7])
+
+table(x[!( x$user=="Dariukxas" | x$user=="Domante Bulovaite" | x$user=="Greta" | x$user=="gretajes" | x$user=="gyse3054" | x$user=="juste" | x$user=="Juste" | x$user=="Karolina" | x$user=="kestous" | x$user=="ogadova" | x$user=="ojautakaite" | x$user=="Raigardas" | x$user=="rokasaleks" |  x$user=="SandraKozlovskaja" | x$user=="simonalevickaite" | x$user=="sindeivydas" | x$user=="j" | x$user=="ju"),7])
+```
+
+Sudaroma nauja lentele is likusiu studentu.
+
+```{r}
+n = x[(x$user=="aipe00" | x$user=="edba2903" | x$user=="emru3000" | x$user=="MildaPie" | x$user=="simona1234" | x$user=="zagnyte"),]
+```
+
+Sudaroma nauja lentele is vardu ir pamoku pavadinimu. Pasaliname besidubliujancius duomenis. Tuomet patikrinam, ar visi paieskoje like studentai atliko visas 16 pamoku.
+
+```{r}
+d=data.frame(n$user, n$lesson_name)
+d2=d[!duplicated(d), ]
+table(d2[,1])
+```
+Visas pamokas pilnai atliko: aipe00, emru3000, simona1234, zagnyte.
+
+##Studentai, nepilnai atlike uzduotis
+
+Sudarome lentele is studentu, kurie nera padare visu uzudociu arba praleido nors viena klausima.
+
+```{r}
+sk=x[!(x$user=="aipe00" | x$user=="emru3000" | x$user=="simona1234" | x$user=="zagnyte"),]
+```
+
+Patikrinama, kiek studentai atliko pamoku.
+
+```{r}
+sk1=data.frame(sk$user, sk$lesson_name)
+sk2=sk1[!duplicated(sk1), ]
+table(sk2[,1])
+```
+
+Patikriname, kiek kas praleido klausimu.
+
+```{r}
+table(sk[sk$skipped==TRUE,7])
+```
+
+##Atlikimo laikas
+
+Pirmiausia susitvarkome duomenu lentele taip, kad joje liktu tik kiekvieno vartotojo atliktos pamokos ir ju atlikimo laikai.
+
+```{r}
+x_time <- x[,c(3, 6, 7, 9, 13)]
+x2 <- x[,c(7,9)]
+dup <- which(duplicated(x2), TRUE)
+x_time <- x_time[-dup,]
+real_taketime <- round(difftime(x_time$sysTime, x_time$datetime, units="mins"))
+x_time <- cbind(x_time, real_taketime)
+```
+
+Pagal vartotoju deklaruojama laika galime apskaiciuoti kiek vidutiniskai uztrunka atlikti kiekviena pamoka:
+
+```{r}
+lessons <- split(x_time, f=x_time$lesson_name)
+time_decl <- sapply(lessons, function(y) round(mean(y$takeTime), 2))
+sort(time_decl)
+```
+
+##Kurios uzduotys sunkiausios?
+
+Sprendziant pagal studentu deklaruojama laika, sunkiausios uzduotys buvo sios:
+```{r}
+head(sort(time_decl, decreasing=TRUE))
+```
+
+Sprendziant pagal praleistu klausimu skaiciu:
+```{r}
+ind <- with(x, which(skipped =="TRUE"))
+x2 <- x[ind,] #praleisti klausimai
+head(sort(table(x2$lesson_name), decreasing=TRUE))
+```
+
+
+
+Informacijos saltiniai : simona1234 , raigardas.
+
