@@ -1,0 +1,73 @@
+---
+title: "Task 11"
+author: "Rokas Aleksandravicius"
+date: "November 10, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Pakete datasets yra duomenų masyvas longley. Iš šio kintamųjų padarykite tiesinę regresiją, kur prognozuojamas kintamasis būtų GNP, o regresorius Employed. Jums reikia:
+
+(1) Įvertinti paprastosios tiesinės regresijos modelį. Pateikti modelio summary ir pakomentuoti ką reiškia gauti skaičiai. Kaip interpretuoti gautus rezultatus?
+
+```{r}
+longley  # Peržiūrime duomenų masyvą
+
+x = longley$Employed  # Regresoriumi parenkame kategoriją 'Employed'
+y = longley$GNP  # Prognozuojamu kintamuoju parenkame 'GNP' kategoriją
+plot(x, y, xlab = "Employed", ylab = "GNP", pch = 8, col = '3')  # Grafiškai pavaizduojame kintamųjų sklaidą
+```
+
+```{r}
+modelis <- lm(y~x)
+summary(modelis)
+```
+
+Funkcijos išvestyje matome:
+
+  Iškviestos funkcijos formulė
+  
+  Likutis ('Residuals'): minimumo taškas ('Min'), pirmas kvartilis ('1Q'), mediana (2kvartilis) ('Median'), 3 kvartilis ('3Q') bei maksimumo taškas ('Max').
+  Koeficientai: įvertis ('Estimate'), standartinė paklaida ('Standard error'), statistika ('t-statistic') ir tikimybė ('p-value')
+  
+  Reikšmingumo kodai, paprasčiau, tikimybės kategorijos
+  
+  Duomenų standartinė paklaida: 0.6566 su 14 laivės laipsniu
+  
+  Pakeltas R kvadratu ir pritaikytas R kvadratu parodo kiek mūsų modelis yra tinkamas
+  
+  Fišerio skirstinio statistika ('F-statistic')
+  
+  Tikimybė ('p-value')
+  
+  Pagal duomenis matome, jog tikimybė yra mažesnė už 0.05, taigi modelyje regresorius yra statistiškai reikšmingas. 
+  Taip pat tai parodo ir tikimybė esanti 'Pr(>|t|)' stulpelyje, kuri irgi mažesnė už 0.05.
+  
+  
+
+(2) Padarykite modelio prognozes taškuose 62, 65, 68.
+
+```{r}
+newx = c(62,65,68)  # Fiksuojame naują  kintamąjį 'newx'
+newy = predict(modelis, newdata = data.frame(x=newx))  # Randame 'newx' atitinkamą koordinatę 'newy'
+newy
+plot(newx, newy, pch = 3, col = '2')  # Pažiūrime, kur randasi naujieji taškai
+```
+
+(3) Išbrėžkite kintamųjų sklaidos diagramą kartu su tiesinės regresijos tiese ir naujomis prognozėmis. Grafiką pateikite su pilna legenda, kurioje būtų nurodyti visi žymėjimai.
+
+```{r}
+plot(x, y, main = 'Sklaidos diagrama', xlab = "Employed", ylab = "GNP", xlim = c(59, 72), pch = 3, col = '2')  # Nubraižome pirminių duomenų sklaidą
+modelis <- lm(y~x)  # Pakartojame modelį, jog būtų galima nubrėžti tiesę
+abline(modelis, pch = 3, col = '3')  # Nubrėžiame tiesinės regresijos tiesę
+newx = c(62,65,68)  
+newy = predict(modelis, newdata = data.frame(x=newx))  # Naudosime naujuosius taškus grafikui
+points(newx, newy, pch = 7, col = '4')  # Pažymime naujai įsivestus taškus grafike
+legend( 68, 340, c("Pradinė sklaida", "Tiesinė regresija", "Naujos reikšmės"), lty = c(0, 1, 0), pch = c(3, 3, 7), col = c('2','3','4'))  # Susikuriame legendą
+```
+
+
+Naudotasi Gretos Lauruskaites darbu

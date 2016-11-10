@@ -1,0 +1,53 @@
+---
+title: "Task10"
+author: "Rokas Aleksandravicius"
+date: "November 7, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+A) Tegul x_1, ..., X_100 ~ N(1, 2). Susigeneruokite tokią imtį ir patikrinkite nulinę hipotezę, kad H_0: miu=1, su alternatyva, kad miu nelygus 1. Tam rekalinga funkcija t.test. Detaliai paaiškinkite ką reiškia funkcijos išvestyje pateikti skaičiai.
+
+```{r}
+set.seed(100)
+# Užfiksuojame skaičius, kad atsakymas nekistų
+
+n <- 100  # Fiksuojame imties dydį
+imtis <- rnorm(n, mean = 1, sd = sqrt(2))  # Susigeneruojame imtį normaliajam skirstiniui
+testavimas <- t.test(imtis,mu = 1)
+testavimas  # Patikrinam nulinę hipotezę, kai miu lygus vienetui
+```
+
+Funkcijos išvestyje pateikta: 1) Duomenys ("data") - musu nagrinejama imtis 2) Statistika ("t") 3) Stjudento skirstinio laisvės laipsnis ("df") 4) Tikimybė, kad bus atmesta tesinga nulinė hipotezė ("p-value") 5) Alternatyva: vidurkis nelygus vienetui ("alternative hypothesis: true mean is not equal to 1") 6) 95% pasikliautinasis intervalas bei jo apatinė ir virsutinė ribos ("95 percent confidence interval") 7) Imties iverčiai: imties vidurkis ("sample estimates: mean of x")
+
+Jei norime atmesti arba priimti nulinę hipotezę, turime atsižvelgti į: 1) "p-value" - jei ji mažesnė už reikšmingumo lygmenį α, tada nulinė hipotezė atmetama, jei didesnė - priemame 2) "95% confidence interval" - jei vienetas pakliūna į šį intervalą, tada nulinę hipotezę priemame, jei nepakliūna - atmetame
+
+Taigi, mūsų imčiai nulinė hipotezė tiek atsižvelgiant į "p-value" (α (=0,05) < 0.9773), tiek į "95% confidence interval" (0.7176968 < 1 < 1.2905412), yra priimama.
+
+(B) Kartokite A) dalies generavimą daug kartų (pvz.10^4) ir suskaičiuokite kiek atveju buvo atmesta nulinė hipotezė? Išreiškite šį skaičių procentais. Kokią išvadą galite padaryti?
+
+```{r}
+set.seed(100)  # 
+
+s = 10^4  # Užsifiksuojame, kiek kartų bus kartojamas generavimas
+alfa = 0.05  # Fiksuojame standartinę α reikšmę
+n = 100  # Fiksuojame imties dydį
+
+funkcija <- function(){
+  imtis <- rnorm(n, mean = 1, sd = sqrt(2)) # Susigeneruojame imtį
+  testavimas <- t.test(imtis, mu = 1)  # Imčiai pritaikome hpotezės tikrinimą
+  atmesta <- testavimas$p.value < alfa  # Vadovausimės tik išvestomis tikimybėmis (jog bus atmesta nulinė hipotezė), kurios mažesnės už α
+  atmesta
+}  # Susigeneruojame funkciją, kuri tikrins hipotezę (H_0: miu=1) pagal tikimybę (p.value), ir gausime atmestas hipotezes
+
+kartojimas <- replicate(s, funkcija())  # Kartojame susigeneruotą funkciją 10^4 kartų
+atsakymas <- (mean(kartojimas))*100
+atsakymas  # Gausime procentinį skaičių, kiek atvejų buvo atmesta nulinė hipotezė   
+```
+
+IŠVADOS: Remdamiesi gautais duomenimis galime daryti išvadą, jog yra 4.8% tikimybė atmesti nulinę hipotezę imčiai su vidurkiu lygiu vienetui. Taigi, vidurkis statistiškai reikšmingai nesiskiria nuo vieneto.
+
+Info šaltinis : Greta Lauruškyte
