@@ -42,7 +42,7 @@ x1
 
 c) Pašalinkite rastas išskirtis iš x vektorius ir nubrėžkite atnaujinto x histogramą.
 
-```{r}
+#```{r}
 remove<-(x1) ##pasirenkame ka salinsime is x
 xnaujas<-setdiff(x, remove) #pasalinamos nereikalingos reiksmes
 xnaujas
